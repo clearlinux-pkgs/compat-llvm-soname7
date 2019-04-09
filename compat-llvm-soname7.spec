@@ -7,7 +7,7 @@
 %define keepstatic 1
 Name     : compat-llvm-soname7
 Version  : 7.0.1
-Release  : 95
+Release  : 96
 URL      : http://releases.llvm.org/7.0.1/llvm-7.0.1.src.tar.xz
 Source0  : http://releases.llvm.org/7.0.1/llvm-7.0.1.src.tar.xz
 Source1  : http://releases.llvm.org/7.0.1/cfe-7.0.1.src.tar.xz
@@ -201,7 +201,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1554748768
+export SOURCE_DATE_EPOCH=1554774308
 unset LD_AS_NEEDED
 mkdir -p clr-build
 pushd clr-build
@@ -245,7 +245,7 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make test
 
 %install
-export SOURCE_DATE_EPOCH=1554748768
+export SOURCE_DATE_EPOCH=1554774308
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/compat-llvm-soname7
 cp LICENSE.TXT %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/LICENSE.TXT
@@ -262,6 +262,16 @@ cp utils/unittest/googletest/LICENSE.TXT %{buildroot}/usr/share/package-licenses
 pushd clr-build
 %make_install
 popd
+## install_append content
+rm %{buildroot}/usr/lib64/libgomp.so
+rm %{buildroot}/usr/lib64/libiomp5.so
+rm %{buildroot}/usr/lib64/libomp.so
+rm %{buildroot}/usr/lib64/libomptarget.rtl.x86_64.so
+rm %{buildroot}/usr/lib64/libomptarget.so
+rm %{buildroot}/usr/lib64/libclang*so
+rm %{buildroot}/usr/lib64/BugpointPasses.so
+rm %{buildroot}/usr/lib64/TestPlugin.so
+## install_append end
 
 %files
 %defattr(-,root,root,-)
@@ -1905,6 +1915,7 @@ popd
 %exclude /usr/include/llvm/ProfileData/SampleProf.h
 %exclude /usr/include/llvm/ProfileData/SampleProfReader.h
 %exclude /usr/include/llvm/ProfileData/SampleProfWriter.h
+%exclude /usr/include/llvm/S
 %exclude /usr/include/llvm/Support/AArch64TargetParser.def
 %exclude /usr/include/llvm/Support/AMDGPUMetadata.h
 %exclude /usr/include/llvm/Support/AMDHSAKernelDescriptor.h
@@ -2235,10 +2246,8 @@ popd
 %exclude /usr/include/llvm/XRay/Trace.h
 %exclude /usr/include/llvm/XRay/XRayRecord.h
 %exclude /usr/include/llvm/XRay/YAMLXRayRecord.h
-%exclude /usr/lib64/BugpointPasses.so
 %exclude /usr/lib64/LLVMHello.so
 %exclude /usr/lib64/LLVMgold.so
-%exclude /usr/lib64/TestPlugin.so
 %exclude /usr/lib64/clang/7.0.1/include/__clang_cuda_builtin_vars.h
 %exclude /usr/lib64/clang/7.0.1/include/__clang_cuda_cmath.h
 %exclude /usr/lib64/clang/7.0.1/include/__clang_cuda_complex_builtins.h
@@ -2409,42 +2418,6 @@ popd
 %exclude /usr/lib64/libLLVM-7.so
 %exclude /usr/lib64/libLLVM.so
 %exclude /usr/lib64/libLTO.so
-%exclude /usr/lib64/libclang.so
-%exclude /usr/lib64/libclangARCMigrate.so
-%exclude /usr/lib64/libclangAST.so
-%exclude /usr/lib64/libclangASTMatchers.so
-%exclude /usr/lib64/libclangAnalysis.so
-%exclude /usr/lib64/libclangBasic.so
-%exclude /usr/lib64/libclangCodeGen.so
-%exclude /usr/lib64/libclangCrossTU.so
-%exclude /usr/lib64/libclangDriver.so
-%exclude /usr/lib64/libclangDynamicASTMatchers.so
-%exclude /usr/lib64/libclangEdit.so
-%exclude /usr/lib64/libclangFormat.so
-%exclude /usr/lib64/libclangFrontend.so
-%exclude /usr/lib64/libclangFrontendTool.so
-%exclude /usr/lib64/libclangHandleCXX.so
-%exclude /usr/lib64/libclangHandleLLVM.so
-%exclude /usr/lib64/libclangIndex.so
-%exclude /usr/lib64/libclangLex.so
-%exclude /usr/lib64/libclangParse.so
-%exclude /usr/lib64/libclangRewrite.so
-%exclude /usr/lib64/libclangRewriteFrontend.so
-%exclude /usr/lib64/libclangSema.so
-%exclude /usr/lib64/libclangSerialization.so
-%exclude /usr/lib64/libclangStaticAnalyzerCheckers.so
-%exclude /usr/lib64/libclangStaticAnalyzerCore.so
-%exclude /usr/lib64/libclangStaticAnalyzerFrontend.so
-%exclude /usr/lib64/libclangTooling.so
-%exclude /usr/lib64/libclangToolingASTDiff.so
-%exclude /usr/lib64/libclangToolingCore.so
-%exclude /usr/lib64/libclangToolingInclusions.so
-%exclude /usr/lib64/libclangToolingRefactor.so
-%exclude /usr/lib64/libgomp.so
-%exclude /usr/lib64/libiomp5.so
-%exclude /usr/lib64/libomp.so
-%exclude /usr/lib64/libomptarget.rtl.x86_64.so
-%exclude /usr/lib64/libomptarget.so
 %exclude /usr/lib64/pkgconfig/LLVMSPIRVLib.pc
 
 %files extras
