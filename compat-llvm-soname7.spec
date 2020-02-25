@@ -7,7 +7,7 @@
 %define keepstatic 1
 Name     : compat-llvm-soname7
 Version  : 7.0.1
-Release  : 99
+Release  : 100
 URL      : http://releases.llvm.org/7.0.1/llvm-7.0.1.src.tar.xz
 Source0  : http://releases.llvm.org/7.0.1/llvm-7.0.1.src.tar.xz
 Source1  : http://releases.llvm.org/7.0.1/cfe-7.0.1.src.tar.xz
@@ -15,20 +15,19 @@ Source2  : https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/4d62009
 Source3  : https://releases.llvm.org/7.0.1/compiler-rt-7.0.1.src.tar.xz
 Source4  : https://releases.llvm.org/7.0.1/lld-7.0.1.src.tar.xz
 Source5  : https://releases.llvm.org/7.0.1/openmp-7.0.1.src.tar.xz
-Source6 : http://releases.llvm.org/7.0.1/llvm-7.0.1.src.tar.xz.sig
-Summary  : LLVM/SPIR-V bi-directional translator
+Source6  : http://releases.llvm.org/7.0.1/llvm-7.0.1.src.tar.xz.sig
+Summary  : No detailed summary available
 Group    : Development/Tools
 License  : BSD-3-Clause MIT NCSA
 Requires: compat-llvm-soname7-lib = %{version}-%{release}
 Requires: compat-llvm-soname7-license = %{version}-%{release}
-Requires: llvm-extras = %{version}-%{release}
+Requires: compat-llvm-soname7-extras = %{version}-%{release}
 BuildRequires : Sphinx
 BuildRequires : Z3-dev
 BuildRequires : binutils-dev
 BuildRequires : buildreq-cmake
 BuildRequires : buildreq-distutils3
 BuildRequires : buildreq-golang
-BuildRequires : cmake
 BuildRequires : doxygen
 BuildRequires : elfutils-dev
 BuildRequires : glibc-dev
@@ -38,10 +37,7 @@ BuildRequires : libstdc++-dev
 BuildRequires : libxml2-dev
 BuildRequires : llvm
 BuildRequires : ncurses-dev
-BuildRequires : perl
-BuildRequires : pkg-config
 BuildRequires : pkgconfig(libffi)
-BuildRequires : protobuf-dev
 BuildRequires : python3-dev
 BuildRequires : subversion
 BuildRequires : valgrind-dev
@@ -96,26 +92,27 @@ license components for the compat-llvm-soname7 package.
 
 %prep
 %setup -q -n llvm-7.0.1.src
-cd ..
-%setup -q -T -D -n llvm-7.0.1.src -b 1
-cd ..
-%setup -q -T -D -n llvm-7.0.1.src -b 4
-cd ..
-%setup -q -T -D -n llvm-7.0.1.src -b 5
-cd ..
-%setup -q -T -D -n llvm-7.0.1.src -b 3
-cd ..
-%setup -q -T -D -n llvm-7.0.1.src -b 2
+cd %{_builddir}
+tar xf %{_sourcedir}/cfe-7.0.1.src.tar.xz
+cd %{_builddir}
+tar xf %{_sourcedir}/lld-7.0.1.src.tar.xz
+cd %{_builddir}
+tar xf %{_sourcedir}/openmp-7.0.1.src.tar.xz
+cd %{_builddir}
+tar xf %{_sourcedir}/compiler-rt-7.0.1.src.tar.xz
+cd %{_builddir}
+tar xf %{_sourcedir}/4d62009e2225024abd481ca982ec3d63304df3f0.tar.gz
+cd %{_builddir}/llvm-7.0.1.src
 mkdir -p tools/clang
-cp -r %{_topdir}/BUILD/cfe-7.0.1.src/* %{_topdir}/BUILD/llvm-7.0.1.src/tools/clang
+cp -r %{_builddir}/cfe-7.0.1.src/* %{_builddir}/llvm-7.0.1.src/tools/clang
 mkdir -p tools/lld
-cp -r %{_topdir}/BUILD/lld-7.0.1.src/* %{_topdir}/BUILD/llvm-7.0.1.src/tools/lld
+cp -r %{_builddir}/lld-7.0.1.src/* %{_builddir}/llvm-7.0.1.src/tools/lld
 mkdir -p projects/openmp
-cp -r %{_topdir}/BUILD/openmp-7.0.1.src/* %{_topdir}/BUILD/llvm-7.0.1.src/projects/openmp
+cp -r %{_builddir}/openmp-7.0.1.src/* %{_builddir}/llvm-7.0.1.src/projects/openmp
 mkdir -p projects/compiler-rt
-cp -r %{_topdir}/BUILD/compiler-rt-7.0.1.src/* %{_topdir}/BUILD/llvm-7.0.1.src/projects/compiler-rt
+cp -r %{_builddir}/compiler-rt-7.0.1.src/* %{_builddir}/llvm-7.0.1.src/projects/compiler-rt
 mkdir -p projects/SPIRV
-cp -r %{_topdir}/BUILD/SPIRV-LLVM-Translator-4d62009e2225024abd481ca982ec3d63304df3f0/* %{_topdir}/BUILD/llvm-7.0.1.src/projects/SPIRV
+cp -r %{_builddir}/SPIRV-LLVM-Translator-4d62009e2225024abd481ca982ec3d63304df3f0/* %{_builddir}/llvm-7.0.1.src/projects/SPIRV
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
@@ -139,7 +136,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1568230548
+export SOURCE_DATE_EPOCH=1582597727
 unset LD_AS_NEEDED
 mkdir -p clr-build
 pushd clr-build
@@ -147,6 +144,8 @@ export GCC_IGNORE_WERROR=1
 export CC=clang
 export CXX=clang++
 export LD=ld.gold
+CFLAGS=${CFLAGS/ -Wa,/ -fno-integrated-as -Wa,}
+CXXFLAGS=${CXXFLAGS/ -Wa,/ -fno-integrated-as -Wa,}
 export CFLAGS="-O2 -g -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=32 -Wformat -Wformat-security -Wno-error -Wl,-z,max-page-size=0x1000 -march=westmere -mtune=haswell"
 export CXXFLAGS=$CFLAGS
 unset LDFLAGS
@@ -177,7 +176,7 @@ export CXXFLAGS="$CXXFLAGS -fno-lto "
 -DLLVM_BINUTILS_INCDIR=/usr/include \
 -DC_INCLUDE_DIRS="/usr/include/c++:/usr/include/c++/x86_64-generic-linux:/usr/include" \
 -DPYTHON_EXECUTABLE:FILEPATH=/usr/bin/python3
-make  %{?_smp_mflags} VERBOSE=1
+make  %{?_smp_mflags}  VERBOSE=1
 popd
 
 %check
@@ -188,20 +187,20 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make test
 
 %install
-export SOURCE_DATE_EPOCH=1568230548
+export SOURCE_DATE_EPOCH=1582597727
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/compat-llvm-soname7
-cp LICENSE.TXT %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/LICENSE.TXT
-cp projects/SPIRV/LICENSE.TXT %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/projects_SPIRV_LICENSE.TXT
-cp projects/compiler-rt/LICENSE.TXT %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/projects_compiler-rt_LICENSE.TXT
-cp projects/openmp/LICENSE.txt %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/projects_openmp_LICENSE.txt
-cp test/YAMLParser/LICENSE.txt %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/test_YAMLParser_LICENSE.txt
-cp tools/clang/LICENSE.TXT %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/tools_clang_LICENSE.TXT
-cp tools/clang/tools/clang-format-vs/ClangFormat/license.txt %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/tools_clang_tools_clang-format-vs_ClangFormat_license.txt
-cp tools/lld/LICENSE.TXT %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/tools_lld_LICENSE.TXT
-cp tools/msbuild/license.txt %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/tools_msbuild_license.txt
-cp utils/unittest/googlemock/LICENSE.txt %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/utils_unittest_googlemock_LICENSE.txt
-cp utils/unittest/googletest/LICENSE.TXT %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/utils_unittest_googletest_LICENSE.TXT
+cp %{_builddir}/SPIRV-LLVM-Translator-4d62009e2225024abd481ca982ec3d63304df3f0/LICENSE.TXT %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/8f178caf2a2d6e6c711a30da69077572df356cf6
+cp %{_builddir}/cfe-7.0.1.src/LICENSE.TXT %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/edaee2367bb685c6121dad596db225c89e7997f4
+cp %{_builddir}/cfe-7.0.1.src/tools/clang-format-vs/ClangFormat/license.txt %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/59d395cdb2e7a9940a56014b5ab7184324ab5cd3
+cp %{_builddir}/compiler-rt-7.0.1.src/LICENSE.TXT %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/087dc93df25686da8c4310c1287a075eba4f38d7
+cp %{_builddir}/lld-7.0.1.src/LICENSE.TXT %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/a29b6fdc498e3bb262d6bf174a9e35545b9bc512
+cp %{_builddir}/llvm-7.0.1.src/LICENSE.TXT %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/835debc425f3db6a5922d7f1b7af45b6833e92f8
+cp %{_builddir}/llvm-7.0.1.src/test/YAMLParser/LICENSE.txt %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/c01c212bdf3925189f673e2081b44094023860ea
+cp %{_builddir}/llvm-7.0.1.src/tools/msbuild/license.txt %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/59d395cdb2e7a9940a56014b5ab7184324ab5cd3
+cp %{_builddir}/llvm-7.0.1.src/utils/unittest/googlemock/LICENSE.txt %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/5a2314153eadadc69258a9429104cd11804ea304
+cp %{_builddir}/llvm-7.0.1.src/utils/unittest/googletest/LICENSE.TXT %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/5a2314153eadadc69258a9429104cd11804ea304
+cp %{_builddir}/openmp-7.0.1.src/LICENSE.txt %{buildroot}/usr/share/package-licenses/compat-llvm-soname7/c29a939b03345c8bf3daf1acb7732f4bdd0232c3
 pushd clr-build
 %make_install
 popd
@@ -2577,14 +2576,12 @@ rm -f %{buildroot}/usr/share/scan-view/startfile.py
 
 %files license
 %defattr(0644,root,root,0755)
-/usr/share/package-licenses/compat-llvm-soname7/LICENSE.TXT
-/usr/share/package-licenses/compat-llvm-soname7/projects_SPIRV_LICENSE.TXT
-/usr/share/package-licenses/compat-llvm-soname7/projects_compiler-rt_LICENSE.TXT
-/usr/share/package-licenses/compat-llvm-soname7/projects_openmp_LICENSE.txt
-/usr/share/package-licenses/compat-llvm-soname7/test_YAMLParser_LICENSE.txt
-/usr/share/package-licenses/compat-llvm-soname7/tools_clang_LICENSE.TXT
-/usr/share/package-licenses/compat-llvm-soname7/tools_clang_tools_clang-format-vs_ClangFormat_license.txt
-/usr/share/package-licenses/compat-llvm-soname7/tools_lld_LICENSE.TXT
-/usr/share/package-licenses/compat-llvm-soname7/tools_msbuild_license.txt
-/usr/share/package-licenses/compat-llvm-soname7/utils_unittest_googlemock_LICENSE.txt
-/usr/share/package-licenses/compat-llvm-soname7/utils_unittest_googletest_LICENSE.TXT
+/usr/share/package-licenses/compat-llvm-soname7/087dc93df25686da8c4310c1287a075eba4f38d7
+/usr/share/package-licenses/compat-llvm-soname7/59d395cdb2e7a9940a56014b5ab7184324ab5cd3
+/usr/share/package-licenses/compat-llvm-soname7/5a2314153eadadc69258a9429104cd11804ea304
+/usr/share/package-licenses/compat-llvm-soname7/835debc425f3db6a5922d7f1b7af45b6833e92f8
+/usr/share/package-licenses/compat-llvm-soname7/8f178caf2a2d6e6c711a30da69077572df356cf6
+/usr/share/package-licenses/compat-llvm-soname7/a29b6fdc498e3bb262d6bf174a9e35545b9bc512
+/usr/share/package-licenses/compat-llvm-soname7/c01c212bdf3925189f673e2081b44094023860ea
+/usr/share/package-licenses/compat-llvm-soname7/c29a939b03345c8bf3daf1acb7732f4bdd0232c3
+/usr/share/package-licenses/compat-llvm-soname7/edaee2367bb685c6121dad596db225c89e7997f4
